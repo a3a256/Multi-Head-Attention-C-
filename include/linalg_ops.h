@@ -23,6 +23,18 @@ std::vector<std::vector<float>> matmul(std::vector<std::vector<float>> one, std:
     return res;
 }
 
-std::vector<std::vector<float>> softmax(std::vector<std::vector<float>> mat){
-    return;
+std::vector<std::vector<float>> softmax(std::vector<std::vector<float>> &mat){
+    float _sum;
+    int i, j;
+    for(i=0; i<mat.size(); i++){
+        _sum = 0.0f;
+        for(j=0; j<mat[i].size(); j++){
+            _sum += std::exp(mat[i][j]);
+        }
+        for(j=0; j<mat[i].size(); j++){
+            mat[i][j] = mat[i][j]/_sum;
+        }
+    }
+
+    return mat;
 }
