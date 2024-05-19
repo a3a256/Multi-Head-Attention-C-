@@ -38,3 +38,15 @@ std::vector<std::vector<float>> softmax(std::vector<std::vector<float>> &mat){
 
     return mat;
 }
+
+std::vector<std::vector<float>> transpose(std::vector<std::vector<float>> mat){
+    int i, j;
+    std::vector<std::vector<float>> res(mat[0].size(), std::vector<float>(mat.size(), 0.0f));
+    for(j=0; j<mat[0].size(); j++){
+        for(i=0; i<mat.size(); i++){
+            res[j][i] = mat[i][j];
+        }
+    }
+
+    return res;
+}
