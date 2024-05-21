@@ -4,6 +4,9 @@
 #include <vector>
 #include <math.h>
 #include "linalg_ops.h"
+#include <random>
+#include <climits>
+#include <numeric>
 
 std::vector<std::vector<float>> attention_layer(std::vector<std::vector<float>> q,
                                                 std::vector<std::vector<float>> k,
@@ -19,3 +22,34 @@ std::vector<std::vector<float>> attention_layer(std::vector<std::vector<float>> 
         }
     }
 }
+
+class MultiHeadAttention{
+    public:
+        int em_size;
+        int heads;
+        std::vector<std::vector<std::vector<float>>> weights;
+        MultiHeadAttention(int em_shape, int num_heads){
+            em_size = em_shape;
+            heads = num_heads;
+            int i, j, k;
+            for(i=0; i<heads; i++){
+                std::vector<std::vector<float>> matrix(heads, std::vector<float>(heads, 0.0f));
+                for(j=0; j<heads; j++){
+                    for(k=0; k<heads; k++){
+                        matrix[j][k] = random_value();
+                    }
+                }
+                weights.push_back(matrix);
+                std::vector<std::vector<float>>().swap(matrix);
+            }
+        }
+
+    private:
+
+        float random_value(){
+            std::random_device seeder;
+            std::mt19937 rng(seeder());
+            std::uniform_int_distribution<long> gen(INT_MIN, INT_MAX);
+            return (float)gen(rng)/(float)RAND_MAX;
+        }
+};
