@@ -29,6 +29,10 @@ class MultiHeadAttention{
             }
         }
 
+        std::vector<std::vector<float>> forward(std::vector<std::vector<float>> x){
+            return;
+        }
+
     private:
 
         float random_value(){
