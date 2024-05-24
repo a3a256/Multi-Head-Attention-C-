@@ -12,7 +12,9 @@ class MultiHeadAttention{
     public:
         int em_size;
         int heads;
-        std::vector<std::vector<std::vector<float>>> weights;
+        std::vector<std::vector<std::vector<float>>> q_weights;
+        std::vector<std::vector<std::vector<float>>> k_weights;
+        std::vector<std::vector<std::vector<float>>> v_weights;
         MultiHeadAttention(int em_shape, int num_heads){
             em_size = em_shape;
             heads = num_heads;
@@ -24,13 +26,50 @@ class MultiHeadAttention{
                         matrix[j][k] = random_value();
                     }
                 }
-                weights.push_back(matrix);
+                q_weights.push_back(matrix);
+                std::vector<std::vector<float>>().swap(matrix);
+            }
+
+            for(i=0; i<heads; i++){
+                std::vector<std::vector<float>> matrix(heads, std::vector<float>(heads, 0.0f));
+                for(j=0; j<heads; j++){
+                    for(k=0; k<heads; k++){
+                        matrix[j][k] = random_value();
+                    }
+                }
+                k_weights.push_back(matrix);
+                std::vector<std::vector<float>>().swap(matrix);
+            }
+
+            for(i=0; i<heads; i++){
+                std::vector<std::vector<float>> matrix(heads, std::vector<float>(heads, 0.0f));
+                for(j=0; j<heads; j++){
+                    for(k=0; k<heads; k++){
+                        matrix[j][k] = random_value();
+                    }
+                }
+                v_weights.push_back(matrix);
                 std::vector<std::vector<float>>().swap(matrix);
             }
         }
 
-        std::vector<std::vector<float>> forward(std::vector<std::vector<float>> x){
-            return;
+        std::vector<std::vector<float>> forward(std::vector<std::vector<float>> q, std::vector<std::vector<float>> k, std::vector<std::vector<float>> v){
+            std::vector<std::vector<std::vector<float>>> outputs;
+            std::vector<std::vector<float>> attention;
+            int i;
+            for(i=0; i<heads; i++){
+                attention = attention_layer(matmul(q, q_weights[i]),
+                                                matmul(k, k_weights[i]),
+                                                matmul(v, v_weights[i]),
+                                                em_size);
+                outputs.push_back(attention);
+            }
+            std::vector<std::vector<float>> result;
+            result = outputs[0];
+            for(i=1; i<outputs.size(); i++){
+                result.insert(result.end(), outputs[i].begin(), outputs[i].end());
+            }
+            return result;
         }
 
     private:
