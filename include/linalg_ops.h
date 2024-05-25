@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <vector>
 #include <math.h>
+#include <random>
+#include <climits>
+#include <numeric>
 
 std::vector<std::vector<float>> matmul(std::vector<std::vector<float>> one, std::vector<std::vector<float>> two){
     int i, j, k;
@@ -49,4 +52,11 @@ std::vector<std::vector<float>> transpose(std::vector<std::vector<float>> mat){
     }
 
     return res;
+}
+
+float random_value(){
+    std::random_device seeder;
+    std::mt19937 rng(seeder());
+    std::uniform_int_distribution<long> gen(INT_MIN, INT_MAX);
+    return (float)gen(rng)/(float)RAND_MAX;
 }

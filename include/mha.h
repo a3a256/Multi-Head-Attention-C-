@@ -8,48 +8,47 @@
 #include <climits>
 #include <numeric>
 
+class Linear{
+    public:
+        int in_features, out_features;
+        std::vector<std::vector<float>> parameters;
+        Linear(int in_channels, int out_channels){
+            in_features = in_channels;
+            out_features = out_channels;
+
+            int i, j;
+            std::vector<float> temp;
+            float val;
+            for(i=0; i<in_channels; i++){
+                for(j=0; j<out_channels; j++){
+                    val = random_value();
+                    temp.push_back(val);
+                }
+                parameters.push_back(temp);
+                std::vector<float>().swap(temp);
+            }
+        }
+
+        std::vector<std::vector<float>> forward(std::vector<std::vector<float>> x){
+            return matmul(x, parameters);
+        }
+};
+
 class MultiHeadAttention{
     public:
         int em_size;
         int heads;
-        std::vector<std::vector<std::vector<float>>> q_weights;
-        std::vector<std::vector<std::vector<float>>> k_weights;
-        std::vector<std::vector<std::vector<float>>> v_weights;
+        std::vector<Linear> q_weights;
+        std::vector<Linear> k_weights;
+        std::vector<Linear> v_weights;
         MultiHeadAttention(int em_shape, int num_heads){
             em_size = em_shape;
             heads = num_heads;
-            int i, j, k;
+            int i;
             for(i=0; i<heads; i++){
-                std::vector<std::vector<float>> matrix(heads, std::vector<float>(heads, 0.0f));
-                for(j=0; j<heads; j++){
-                    for(k=0; k<heads; k++){
-                        matrix[j][k] = random_value();
-                    }
-                }
-                q_weights.push_back(matrix);
-                std::vector<std::vector<float>>().swap(matrix);
-            }
-
-            for(i=0; i<heads; i++){
-                std::vector<std::vector<float>> matrix(heads, std::vector<float>(heads, 0.0f));
-                for(j=0; j<heads; j++){
-                    for(k=0; k<heads; k++){
-                        matrix[j][k] = random_value();
-                    }
-                }
-                k_weights.push_back(matrix);
-                std::vector<std::vector<float>>().swap(matrix);
-            }
-
-            for(i=0; i<heads; i++){
-                std::vector<std::vector<float>> matrix(heads, std::vector<float>(heads, 0.0f));
-                for(j=0; j<heads; j++){
-                    for(k=0; k<heads; k++){
-                        matrix[j][k] = random_value();
-                    }
-                }
-                v_weights.push_back(matrix);
-                std::vector<std::vector<float>>().swap(matrix);
+                q_weights.push_back(Linear(em_shape, em_shape));
+                k_weights.push_back(Linear(em_shape, em_shape));
+                v_weights.push_back(Linear(em_shape, em_shape));
             }
         }
 
@@ -58,10 +57,10 @@ class MultiHeadAttention{
             std::vector<std::vector<float>> attention;
             int i;
             for(i=0; i<heads; i++){
-                attention = attention_layer(matmul(q, q_weights[i]),
-                                                matmul(k, k_weights[i]),
-                                                matmul(v, v_weights[i]),
-                                                em_size);
+                attention = attention_layer(q_weights[i].forward(q),
+                                            k_weights[i].forward(k),
+                                            v_weights[i].forward(v),
+                                            em_size);
                 outputs.push_back(attention);
             }
             std::vector<std::vector<float>> result;
@@ -73,13 +72,6 @@ class MultiHeadAttention{
         }
 
     private:
-
-        float random_value(){
-            std::random_device seeder;
-            std::mt19937 rng(seeder());
-            std::uniform_int_distribution<long> gen(INT_MIN, INT_MAX);
-            return (float)gen(rng)/(float)RAND_MAX;
-        }
 
         std::vector<std::vector<float>> attention_layer(std::vector<std::vector<float>> q,
                                                 std::vector<std::vector<float>> k,
