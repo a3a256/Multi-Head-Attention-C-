@@ -42,7 +42,7 @@ class MultiHeadAttention{
         std::vector<Linear> k_weights;
         std::vector<Linear> v_weights;
 
-        std::vector<Linear> attention;
+        std::vector<Linear> attention_fc;
 
         MultiHeadAttention(int em_shape, int num_heads){
             em_size = em_shape;
@@ -54,13 +54,13 @@ class MultiHeadAttention{
                 v_weights.push_back(Linear(em_shape, em_shape));
             }
             Linear layer(em_size*heads, em_size);
-            attention.push_back(layer);
+            attention_fc.push_back(layer);
         }
 
         std::vector<std::vector<float>> forward(std::vector<std::vector<float>> q, std::vector<std::vector<float>> k, std::vector<std::vector<float>> v){
             std::vector<std::vector<std::vector<float>>> outputs;
             std::vector<std::vector<float>> attention;
-            int i;
+            int i, j;
             for(i=0; i<heads; i++){
                 attention = attention_layer(q_weights[i].forward(q),
                                             k_weights[i].forward(k),
@@ -71,9 +71,11 @@ class MultiHeadAttention{
             std::vector<std::vector<float>> result;
             result = outputs[0];
             for(i=1; i<outputs.size(); i++){
-                result.insert(result.end(), outputs[i].begin(), outputs[i].end());
+                for(j=0; j<outputs[i].size(); j++){
+                    result[j].insert(result[j].end(), outputs[i][j].begin(), outputs[i][j].end());
+                }
             }
-            return result;
+            return attention_fc[0].forward(result);
         }
 
     private:
